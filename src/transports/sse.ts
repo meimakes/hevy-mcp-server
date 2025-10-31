@@ -112,13 +112,14 @@ export function createSSETransport(
     next();
   });
 
-  // Rate limiting
+  // Rate limiting (skip health check for Railway and monitoring)
   const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 1000, // Generous limit for AI agents (1000 requests per 15 min)
     message: 'Too many requests from this IP, please try again later',
     standardHeaders: true,
     legacyHeaders: false,
+    skip: (req) => req.path === '/health', // Exempt health check from rate limiting
     handler: (req, res) => {
       logger.rateLimitExceeded(req.ip, req.path);
       res.status(429).json({
@@ -128,7 +129,7 @@ export function createSSETransport(
     },
   });
 
-  // Apply rate limiting to all routes
+  // Apply rate limiting to all routes (except health check)
   app.use(limiter);
 
   // Stricter rate limiting for authentication

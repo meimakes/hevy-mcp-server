@@ -16,7 +16,8 @@ async function main() {
     const apiBaseUrl = process.env.HEVY_API_BASE_URL;
     const transport = process.env.TRANSPORT || 'stdio';
     const port = parseInt(process.env.PORT || '3000', 10);
-    const host = process.env.HOST || '127.0.0.1';
+    // Use 0.0.0.0 for Railway/production, 127.0.0.1 for local development
+    const host = process.env.HOST || (process.env.RAILWAY_ENVIRONMENT ? '0.0.0.0' : '127.0.0.1');
     const ssePath = process.env.SSE_PATH || '/mcp';
     const heartbeatInterval = parseInt(process.env.HEARTBEAT_INTERVAL || '30000', 10);
     const authToken = process.env.AUTH_TOKEN;
