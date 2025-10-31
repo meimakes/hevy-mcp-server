@@ -2,6 +2,12 @@
 
 A Model Context Protocol (MCP) server that connects to the official Hevy API and exposes workout data to AI assistants. Supports dual transport modes: stdio for Claude Desktop and SSE for remote access (e.g., Poke.com).
 
+## Deploy to Railway
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/hevy-mcp-server?referralCode=bonus)
+
+Click the button above to deploy your own instance to Railway. See the [Railway Deployment](#railway-deployment) section below for configuration details.
+
 ## Features
 
 ### MCP Tools
@@ -313,6 +319,208 @@ If you get authentication errors when connecting to Poke.com:
 2. Ensure you're sending the Authorization header: `Bearer your_token_here`
 3. Check that the token in Poke.com matches exactly what's in your `.env`
 4. Regenerate the token if needed: `npm run generate-token`
+
+## Railway Deployment
+
+Railway provides a simple way to deploy the Hevy MCP Server to the cloud, making it accessible from Poke.com and other remote MCP clients without needing ngrok or manual server management.
+
+### Quick Deploy
+
+1. Click the **Deploy on Railway** button at the top of this README
+2. Connect your Railway account (sign up if needed)
+3. Configure the required environment variables (see below)
+4. Railway will automatically build and deploy your server
+
+### Required Environment Variables
+
+When deploying to Railway, configure these environment variables in your Railway project settings:
+
+```bash
+# Required
+HEVY_API_KEY=your_hevy_api_key_here
+AUTH_TOKEN=your_generated_token_here  # Generate with: openssl rand -hex 32
+
+# Transport Configuration
+TRANSPORT=sse                          # Use SSE mode for Railway
+PORT=3000                              # Railway will override this automatically
+
+# Optional - Advanced Configuration
+NODE_ENV=production                    # Enables production security features
+SESSION_TIMEOUT=2592000000            # 30 days in milliseconds
+HEARTBEAT_INTERVAL=30000              # 30 seconds
+SSE_PATH=/mcp                         # MCP endpoint path
+
+# Optional - HTTPS (if using custom domain with SSL)
+ENABLE_HTTPS=false                    # Set to true if you have SSL certificates
+```
+
+### Step-by-Step Railway Deployment
+
+#### 1. Generate AUTH_TOKEN
+
+Before deploying, generate a secure authentication token:
+
+```bash
+# Option 1: Using OpenSSL
+openssl rand -hex 32
+
+# Option 2: Using Node.js
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+Save this token - you'll need it for both Railway configuration and Poke.com connection.
+
+#### 2. Deploy to Railway
+
+1. Click the **Deploy on Railway** button
+2. Authorize Railway to access your GitHub account (if using template)
+3. Railway will create a new project and start the deployment
+
+#### 3. Configure Environment Variables
+
+In your Railway project dashboard:
+
+1. Go to **Variables** tab
+2. Add the required environment variables:
+   - `HEVY_API_KEY`: Your Hevy API key from https://hevy.com/settings?developer
+   - `AUTH_TOKEN`: The token you generated in step 1
+   - `TRANSPORT`: Set to `sse`
+   - `NODE_ENV`: Set to `production`
+
+3. Railway will automatically redeploy with the new variables
+
+#### 4. Get Your Railway URL
+
+After deployment completes:
+
+1. Go to **Settings** tab in Railway dashboard
+2. Under **Domains**, you'll see your Railway-provided URL (e.g., `your-app.railway.app`)
+3. Your MCP endpoint will be: `https://your-app.railway.app/mcp`
+4. Health check endpoint: `https://your-app.railway.app/health`
+
+#### 5. Connect from Poke.com
+
+1. Go to https://poke.com/settings/connections
+2. Click **Add new MCP connection**
+3. Configure the connection:
+   - **URL**: `https://your-app.railway.app/mcp`
+   - **Authorization Header**: `Bearer your_auth_token_here`
+4. Test the connection:
+   - Try: "Tell the subagent to use the 'hevy' integration's 'get-workouts' tool"
+
+### Railway Health Checks
+
+Railway automatically monitors your server health:
+
+- **Endpoint**: `/health`
+- **Expected Response**: `200 OK` with JSON body
+- **Frequency**: Every 60-100 seconds
+- **Behavior**: Unauthenticated and exempt from rate limiting
+
+The health check returns:
+
+```json
+{
+  "status": "healthy",
+  "timestamp": "2025-10-31T12:00:00.000Z",
+  "transport": "sse"
+}
+```
+
+### Monitoring Your Railway Deployment
+
+#### View Logs
+
+In Railway dashboard:
+1. Go to **Deployments** tab
+2. Click on your active deployment
+3. View real-time logs with structured JSON output
+
+Look for these log entries:
+- `Hevy MCP Server started` - Server initialization
+- `SSE connection established` - Client connections
+- `API request` - Hevy API calls with response times
+
+#### Check Metrics
+
+Railway provides built-in metrics:
+- **CPU Usage**: Should be low (<10%) when idle
+- **Memory Usage**: Typically 50-100MB
+- **Network**: Monitor for unusual traffic patterns
+- **Response Times**: API requests logged with duration
+
+#### Troubleshooting Railway Deployments
+
+**Build Fails:**
+- Check build logs in Railway dashboard
+- Verify `package.json` has all dependencies
+- Ensure Node.js version compatibility (18+)
+
+**Health Check Fails:**
+- Verify server starts successfully in logs
+- Check if `PORT` environment variable conflicts
+- Ensure `/health` endpoint returns 200 status
+
+**Connection Refused from Poke.com:**
+- Verify `AUTH_TOKEN` is set in Railway variables
+- Check AUTH_TOKEN matches in Poke.com settings
+- Ensure `TRANSPORT=sse` is set
+- Verify Railway URL is accessible: `curl https://your-app.railway.app/health`
+
+**Rate Limiting Issues:**
+- Default: 1000 requests per 15 minutes (generous for AI agents)
+- Health checks exempt from rate limiting
+- Check logs for `rate_limit_exceeded` entries
+- Adjust rate limits in `src/transports/sse.ts` if needed
+
+### Railway Configuration Files
+
+The project includes Railway configuration files:
+
+- `railway.json` - JSON format configuration
+- `railway.toml` - TOML format configuration (alternative)
+
+These files configure:
+- Build command: `npm install && npm run build`
+- Start command: `node dist/index.js`
+- Health check path: `/health`
+- Restart policy: Restart on failure (max 10 retries)
+
+### Custom Domain (Optional)
+
+To use a custom domain with Railway:
+
+1. Go to **Settings** > **Domains**
+2. Click **Add Custom Domain**
+3. Enter your domain name
+4. Add the CNAME record to your DNS provider
+5. Railway will automatically provision SSL certificate
+6. Update Poke.com connection with your custom domain
+
+### Security Considerations for Railway
+
+When deployed to Railway:
+
+- ✅ **Always use AUTH_TOKEN** - Required for production
+- ✅ **HTTPS enabled** - Railway provides automatic SSL
+- ✅ **Rate limiting active** - Protects against abuse
+- ✅ **Request timeouts** - Prevents hanging connections
+- ✅ **Structured logging** - Audit trail for security events
+- ✅ **Session management** - 30-day timeout for reconnection
+- ✅ **Security headers** - Helmet middleware enabled
+- ⚠️ **Monitor logs regularly** - Watch for unauthorized access attempts
+
+### Cost Estimates
+
+Railway pricing (as of 2025):
+- **Hobby Plan**: $5/month with $5 usage credits
+- **Typical usage**: <$1/month for light to moderate use
+- **Free tier**: Available for small projects
+
+Estimated costs for this server:
+- **Idle**: ~$0.50/month (minimal CPU/memory)
+- **Light use**: ~$1-2/month (occasional API calls)
+- **Heavy use**: ~$3-5/month (frequent AI agent interactions)
 
 ## API Rate Limits
 
