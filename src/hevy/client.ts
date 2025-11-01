@@ -53,9 +53,27 @@ export class HevyClient {
       clearTimeout(timeout);
 
       if (!response.ok) {
-        const errorText = await response.text();
+        let errorMessage = response.statusText;
+        try {
+          const errorBody = await response.text();
+          // Try to parse as JSON first
+          try {
+            const errorJson = JSON.parse(errorBody);
+            // Extract error message from common API error formats
+            errorMessage = errorJson.error?.message ||
+                          errorJson.message ||
+                          errorJson.error ||
+                          JSON.stringify(errorJson);
+          } catch {
+            // If not JSON, use the text as is
+            errorMessage = errorBody || errorMessage;
+          }
+        } catch {
+          // If we can't read the body, just use statusText
+        }
+
         throw new Error(
-          `Hevy API error (${response.status}): ${errorText || response.statusText}`
+          `Hevy API error (${response.status}): ${errorMessage}`
         );
       }
 
