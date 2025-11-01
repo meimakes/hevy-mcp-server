@@ -102,14 +102,14 @@ export class HevyClient {
   async createWorkout(data: CreateWorkoutInput): Promise<Workout> {
     return this.request<Workout>('/v1/workouts', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify({ workout: data }),
     });
   }
 
   async updateWorkout(id: string, data: UpdateWorkoutInput): Promise<Workout> {
     return this.request<Workout>(`/v1/workouts/${encodeURIComponent(id)}`, {
       method: 'PUT',
-      body: JSON.stringify(data),
+      body: JSON.stringify({ workout: data }),
     });
   }
 
@@ -152,14 +152,14 @@ export class HevyClient {
   async createRoutine(data: CreateRoutineInput): Promise<Routine> {
     return this.request<Routine>('/v1/routines', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify({ routine: data }),
     });
   }
 
   async updateRoutine(id: string, data: UpdateRoutineInput): Promise<Routine> {
     return this.request<Routine>(`/v1/routines/${encodeURIComponent(id)}`, {
       method: 'PUT',
-      body: JSON.stringify(data),
+      body: JSON.stringify({ routine: data }),
     });
   }
 
@@ -228,14 +228,14 @@ export class HevyClient {
   async createRoutineFolder(data: CreateFolderInput): Promise<RoutineFolder> {
     return this.request<RoutineFolder>('/v1/routine_folders', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify({ folder: data }),
     });
   }
 
   async updateRoutineFolder(id: string, data: CreateFolderInput): Promise<RoutineFolder> {
     return this.request<RoutineFolder>(`/v1/routine_folders/${encodeURIComponent(id)}`, {
       method: 'PUT',
-      body: JSON.stringify(data),
+      body: JSON.stringify({ folder: data }),
     });
   }
 
@@ -262,7 +262,7 @@ export class HevyClient {
   async createWebhookSubscription(data: CreateWebhookInput): Promise<WebhookSubscription> {
     return this.request<WebhookSubscription>('/v1/webhooks/subscription', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify({ webhook: data }),
     });
   }
 
