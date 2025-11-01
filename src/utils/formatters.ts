@@ -14,21 +14,30 @@ export function formatWorkout(workout: Workout): string {
   lines.push('');
 
   lines.push('## Exercises');
-  workout.exercises.forEach((exercise, idx) => {
-    lines.push(`### ${idx + 1}. Exercise ID: ${exercise.exercise_template_id}`);
-    if (exercise.superset_id) {
-      lines.push(`   *Superset ID: ${exercise.superset_id}*`);
-    }
-    if (exercise.notes) {
-      lines.push(`   *Notes: ${exercise.notes}*`);
-    }
 
-    lines.push('   **Sets:**');
-    exercise.sets.forEach((set, setIdx) => {
-      lines.push(`   ${setIdx + 1}. ${formatSet(set)}`);
+  // Defensive check: ensure exercises exists and is an array
+  if (!workout.exercises || !Array.isArray(workout.exercises)) {
+    lines.push('No exercises recorded.');
+  } else {
+    workout.exercises.forEach((exercise, idx) => {
+      lines.push(`### ${idx + 1}. Exercise ID: ${exercise.exercise_template_id}`);
+      if (exercise.superset_id) {
+        lines.push(`   *Superset ID: ${exercise.superset_id}*`);
+      }
+      if (exercise.notes) {
+        lines.push(`   *Notes: ${exercise.notes}*`);
+      }
+
+      lines.push('   **Sets:**');
+      // Defensive check for sets array
+      if (exercise.sets && Array.isArray(exercise.sets)) {
+        exercise.sets.forEach((set, setIdx) => {
+          lines.push(`   ${setIdx + 1}. ${formatSet(set)}`);
+        });
+      }
+      lines.push('');
     });
-    lines.push('');
-  });
+  }
 
   return lines.join('\n');
 }
@@ -67,18 +76,24 @@ export function formatRoutine(routine: Routine): string {
   lines.push('');
 
   lines.push('## Exercises');
-  routine.exercises.forEach((exercise, idx) => {
-    lines.push(`### ${idx + 1}. Exercise ID: ${exercise.exercise_template_id}`);
-    if (exercise.superset_id) {
-      lines.push(`   *Superset ID: ${exercise.superset_id}*`);
-    }
-    if (exercise.notes) {
-      lines.push(`   *Notes: ${exercise.notes}*`);
-    }
 
-    lines.push(`   **${exercise.sets.length} sets planned**`);
-    lines.push('');
-  });
+  // Defensive check: ensure exercises exists and is an array
+  if (!routine.exercises || !Array.isArray(routine.exercises)) {
+    lines.push('No exercises defined.');
+  } else {
+    routine.exercises.forEach((exercise, idx) => {
+      lines.push(`### ${idx + 1}. Exercise ID: ${exercise.exercise_template_id}`);
+      if (exercise.superset_id) {
+        lines.push(`   *Superset ID: ${exercise.superset_id}*`);
+      }
+      if (exercise.notes) {
+        lines.push(`   *Notes: ${exercise.notes}*`);
+      }
+
+      lines.push(`   **${exercise.sets.length} sets planned**`);
+      lines.push('');
+    });
+  }
 
   return lines.join('\n');
 }
