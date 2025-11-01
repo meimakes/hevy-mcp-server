@@ -182,28 +182,17 @@ ngrok http 3004
 #### 4. Connect to Poke.com:
 
 1. Go to https://poke.com/settings/connections
-2. Add new MCP connection
-3. Enter your ngrok URL: `https://your-id.ngrok.io/mcp`
-4. Add Authorization header: `Bearer your_auth_token_here`
-5. Test with: "Tell the subagent to use the 'hevy' integration's 'get-workouts' tool"
+2. Add new Custom Integration
+3. Enter your ngrok or Railway URL: `https://your-url.io/mcp`
+4. Add your generated AUTH_TOKEN as the API Key
+5. Test with: "Show me my last workout using the Hevy integration"
 
 ## Example Usage
 
-### With Claude Desktop
-
 ```
-"Show me my last 5 workouts"
+"Show me my last 5 workouts from Hevy"
 "What was my best bench press weight?"
 "Create a new Push Day routine with bench press, overhead press, and tricep dips"
-"Log today's leg workout"
-```
-
-### With Poke.com
-
-```
-"Tell the subagent to use the 'hevy' integration's 'get-workouts' tool with startDate '2025-01-01' and limit 10"
-"Use the hevy integration to show my exercise templates"
-"Create a new workout using the hevy integration"
 ```
 
 ## Development
@@ -406,7 +395,7 @@ After deployment completes:
    - **URL**: `https://your-app.railway.app/mcp`
    - **Authorization Header**: `Bearer your_auth_token_here`
 4. Test the connection:
-   - Try: "Tell the subagent to use the 'hevy' integration's 'get-workouts' tool"
+   - Try: "Use the Hevy integration to show me my last workout"
 
 ### Railway Health Checks
 
@@ -486,17 +475,6 @@ These files configure:
 - Health check path: `/health`
 - Restart policy: Restart on failure (max 10 retries)
 
-### Custom Domain (Optional)
-
-To use a custom domain with Railway:
-
-1. Go to **Settings** > **Domains**
-2. Click **Add Custom Domain**
-3. Enter your domain name
-4. Add the CNAME record to your DNS provider
-5. Railway will automatically provision SSL certificate
-6. Update Poke.com connection with your custom domain
-
 ### Security Considerations for Railway
 
 When deployed to Railway:
@@ -510,18 +488,6 @@ When deployed to Railway:
 - ✅ **Security headers** - Helmet middleware enabled
 - ⚠️ **Monitor logs regularly** - Watch for unauthorized access attempts
 
-### Cost Estimates
-
-Railway pricing (as of 2025):
-- **Hobby Plan**: $5/month with $5 usage credits
-- **Typical usage**: <$1/month for light to moderate use
-- **Free tier**: Available for small projects
-
-Estimated costs for this server:
-- **Idle**: ~$0.50/month (minimal CPU/memory)
-- **Light use**: ~$1-2/month (occasional API calls)
-- **Heavy use**: ~$3-5/month (frequent AI agent interactions)
-
 ## Rate Limiting
 
 ### MCP Server Rate Limits (SSE Mode)
@@ -533,10 +499,6 @@ The server implements rate limiting to protect against abuse:
 - **Health checks**: Exempt from rate limiting
 
 If you encounter rate limiting issues, you can adjust the limits in `src/transports/sse.ts`.
-
-### Hevy API Rate Limits
-
-The upstream Hevy API may also have its own rate limits. Be mindful of the number of requests when performing bulk operations or frequent polling.
 
 ## Contributing
 
