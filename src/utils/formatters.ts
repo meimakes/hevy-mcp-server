@@ -61,7 +61,9 @@ export function formatSet(set: ExerciseSet): string {
   const parts: string[] = [set.type];
 
   if (set.weight_kg !== null && set.weight_kg !== undefined) {
-    parts.push(`${set.weight_kg}kg`);
+    // Round to 2 decimal places for cleaner display
+    const weight = Math.round(set.weight_kg * 100) / 100;
+    parts.push(`${weight}kg`);
   }
   if (set.reps !== null && set.reps !== undefined) {
     parts.push(`${set.reps} reps`);
