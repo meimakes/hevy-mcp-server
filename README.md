@@ -4,7 +4,7 @@ A Model Context Protocol (MCP) server that connects to the official Hevy API and
 
 ## Deploy to Railway
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/github.com/meimakes/hevy-mcp-server)
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/dhh51B?referralCode=7zdyjn&utm_medium=integration&utm_source=template&utm_campaign=generic)
 
 Click the button above to deploy your own instance to Railway. See the [Railway Deployment](#railway-deployment) section below for configuration details.
 
